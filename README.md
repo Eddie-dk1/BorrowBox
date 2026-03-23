@@ -121,3 +121,5 @@ Progress completed:
 - Core domain types introduced in `src/types/domain.ts`.
 - UI/store coupling reduced via API adapter: `src/api/marketplaceApi.ts`.
 - Existing pages/components switched to use the API adapter.
+- Core utility/business modules migrated to TypeScript:
+  `src/utils/storage.ts`, `src/utils/date.ts`, `src/utils/price.ts`, `src/utils/store.ts`.

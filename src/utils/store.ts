@@ -2,6 +2,19 @@ import { mockItems } from '../data/mockItems';
 import { mockNotifications } from '../data/mockNotifications';
 import { mockReviews } from '../data/mockReviews';
 import { currentUserId, mockUsers } from '../data/mockUsers';
+import type {
+  Booking,
+  BookingStatus,
+  CreateBookingInput,
+  CreateItemInput,
+  Item,
+  Notification,
+  NotificationType,
+  OwnerPublicStats,
+  Review,
+  UpdateItemInput,
+  User
+} from '../types/domain';
 import { diffCalendarDaysInclusive, rangesOverlap } from './date';
 import { calculateTotalPrice } from './price';
 import { readJson, STORAGE_KEYS, writeJson } from './storage';
@@ -11,28 +24,28 @@ const OLD_MACBOOK_IMAGE =
 const NEW_MACBOOK_IMAGE =
   'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80';
 
-function getFavoritesKey(userId = currentUserId) {
+function getFavoritesKey(userId: string = currentUserId): string {
   return `borrowbox_favorites_${userId}`;
 }
 
-function emitNotificationsChanged() {
+function emitNotificationsChanged(): void {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('borrowbox:notifications-changed'));
   }
 }
 
-function emitToast(payload) {
+function emitToast(payload: { id: string; message: string; link: string }): void {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('borrowbox:toast', { detail: payload }));
   }
 }
 
-export function initializeStore() {
+export function initializeStore(): void {
   if (!localStorage.getItem(STORAGE_KEYS.items)) {
     writeJson(STORAGE_KEYS.items, mockItems);
   }
   if (!localStorage.getItem(STORAGE_KEYS.bookings)) {
-    writeJson(STORAGE_KEYS.bookings, []);
+    writeJson(STORAGE_KEYS.bookings, [] as Booking[]);
   }
   if (!localStorage.getItem(STORAGE_KEYS.reviews)) {
     writeJson(STORAGE_KEYS.reviews, mockReviews);
@@ -41,10 +54,10 @@ export function initializeStore() {
     writeJson(STORAGE_KEYS.notifications, mockNotifications);
   }
   if (!localStorage.getItem(getFavoritesKey())) {
-    writeJson(getFavoritesKey(), []);
+    writeJson(getFavoritesKey(), [] as string[]);
   }
 
-  const items = readJson(STORAGE_KEYS.items, []);
+  const items = readJson<Item[]>(STORAGE_KEYS.items, []);
   const migrated = items.map((item) => {
     if (item.id === 'item_3' && item.image === OLD_MACBOOK_IMAGE) {
       return { ...item, image: NEW_MACBOOK_IMAGE };
@@ -54,29 +67,29 @@ export function initializeStore() {
   writeJson(STORAGE_KEYS.items, migrated);
 }
 
-export function getUsers() {
+export function getUsers(): User[] {
   return mockUsers;
 }
 
-export function getUserById(userId) {
+export function getUserById(userId: string): User | undefined {
   return mockUsers.find((user) => user.id === userId);
 }
 
-export function getCurrentUser() {
-  return mockUsers.find((user) => user.id === currentUserId) || mockUsers[0];
+export function getCurrentUser(): User {
+  return (mockUsers.find((user) => user.id === currentUserId) || mockUsers[0]) as User;
 }
 
-export function getItems() {
-  return readJson(STORAGE_KEYS.items, []);
+export function getItems(): Item[] {
+  return readJson<Item[]>(STORAGE_KEYS.items, []);
 }
 
-export function getItemById(itemId) {
+export function getItemById(itemId: string): Item | undefined {
   return getItems().find((item) => item.id === itemId);
 }
 
-export function addItem(payload) {
+export function addItem(payload: CreateItemInput): Item {
   const owner = getCurrentUser();
-  const newItem = {
+  const newItem: Item = {
     id: `item_${crypto.randomUUID()}`,
     title: payload.title,
     category: payload.category,
@@ -97,7 +110,7 @@ export function addItem(payload) {
   return newItem;
 }
 
-export function updateItem(itemId, payload) {
+export function updateItem(itemId: string, payload: UpdateItemInput): Item | undefined {
   const items = getItems();
   const existing = items.find((item) => item.id === itemId);
   if (!existing) throw new Error('Item not found');
@@ -122,22 +135,22 @@ export function updateItem(itemId, payload) {
   return next.find((item) => item.id === itemId);
 }
 
-export function getBookings() {
-  return readJson(STORAGE_KEYS.bookings, []);
+export function getBookings(): Booking[] {
+  return readJson<Booking[]>(STORAGE_KEYS.bookings, []);
 }
 
-export function getNotifications() {
-  return readJson(STORAGE_KEYS.notifications, [])
+export function getNotifications(): Notification[] {
+  return readJson<Notification[]>(STORAGE_KEYS.notifications, [])
     .filter((notification) => notification.userId === currentUserId)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function getUnreadNotificationsCount() {
+export function getUnreadNotificationsCount(): number {
   return getNotifications().filter((notification) => !notification.isRead).length;
 }
 
-export function markAllNotificationsRead() {
-  const notifications = readJson(STORAGE_KEYS.notifications, []);
+export function markAllNotificationsRead(): void {
+  const notifications = readJson<Notification[]>(STORAGE_KEYS.notifications, []);
   const next = notifications.map((notification) => {
     if (notification.userId !== currentUserId) return notification;
     return { ...notification, isRead: true };
@@ -146,8 +159,8 @@ export function markAllNotificationsRead() {
   emitNotificationsChanged();
 }
 
-export function markNotificationRead(notificationId) {
-  const notifications = readJson(STORAGE_KEYS.notifications, []);
+export function markNotificationRead(notificationId: string): void {
+  const notifications = readJson<Notification[]>(STORAGE_KEYS.notifications, []);
   const next = notifications.map((notification) => {
     if (notification.id !== notificationId) return notification;
     if (notification.userId !== currentUserId) return notification;
@@ -157,9 +170,19 @@ export function markNotificationRead(notificationId) {
   emitNotificationsChanged();
 }
 
-function addNotification({ userId, type, message, link = '/dashboard' }) {
-  const notifications = readJson(STORAGE_KEYS.notifications, []);
-  const newNotification = {
+function addNotification({
+  userId,
+  type,
+  message,
+  link = '/dashboard'
+}: {
+  userId: string;
+  type: NotificationType;
+  message: string;
+  link?: string;
+}): void {
+  const notifications = readJson<Notification[]>(STORAGE_KEYS.notifications, []);
+  const newNotification: Notification = {
     id: `note_${crypto.randomUUID()}`,
     userId,
     type,
@@ -168,10 +191,7 @@ function addNotification({ userId, type, message, link = '/dashboard' }) {
     createdAt: new Date().toISOString(),
     link
   };
-  const next = [
-    newNotification,
-    ...notifications
-  ];
+  const next = [newNotification, ...notifications];
   writeJson(STORAGE_KEYS.notifications, next);
   emitNotificationsChanged();
   if (userId === currentUserId) {
@@ -183,17 +203,17 @@ function addNotification({ userId, type, message, link = '/dashboard' }) {
   }
 }
 
-export function getReviews() {
-  return readJson(STORAGE_KEYS.reviews, []);
+export function getReviews(): Review[] {
+  return readJson<Review[]>(STORAGE_KEYS.reviews, []);
 }
 
-export function getReviewsByOwnerId(ownerId) {
+export function getReviewsByOwnerId(ownerId: string): Review[] {
   return getReviews()
     .filter((review) => review.ownerId === ownerId)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function getOwnerPublicStats(ownerId) {
+export function getOwnerPublicStats(ownerId: string): OwnerPublicStats {
   const listings = getItems().filter((item) => item.ownerId === ownerId);
   const ownerBookings = getBookings().filter((booking) => booking.ownerId === ownerId);
   const reviews = getReviewsByOwnerId(ownerId);
@@ -215,7 +235,7 @@ export function getOwnerPublicStats(ownerId) {
   };
 }
 
-function hasConflict(itemId, startDate, endDate) {
+function hasConflict(itemId: string, startDate: string, endDate: string): boolean {
   return getBookings().some((booking) => {
     if (booking.itemId !== itemId) return false;
     if (!['pending', 'approved'].includes(booking.status)) return false;
@@ -223,21 +243,20 @@ function hasConflict(itemId, startDate, endDate) {
   });
 }
 
-export function getActiveBookingsForItem(itemId) {
+export function getActiveBookingsForItem(itemId: string): Booking[] {
   return getBookings()
     .filter(
-      (booking) =>
-        booking.itemId === itemId && ['pending', 'approved'].includes(booking.status)
+      (booking) => booking.itemId === itemId && ['pending', 'approved'].includes(booking.status)
     )
-    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 }
 
-export function hasBookingConflict(itemId, startDate, endDate) {
+export function hasBookingConflict(itemId: string, startDate: string, endDate: string): boolean {
   if (!itemId || !startDate || !endDate) return false;
   return hasConflict(itemId, startDate, endDate);
 }
 
-export function createBooking({ itemId, startDate, endDate }) {
+export function createBooking({ itemId, startDate, endDate }: CreateBookingInput): Booking {
   const item = getItemById(itemId);
   if (!item) throw new Error('Item not found');
   if (item.ownerId === currentUserId) throw new Error('You cannot book your own item');
@@ -250,7 +269,7 @@ export function createBooking({ itemId, startDate, endDate }) {
   const totalDays = diffCalendarDaysInclusive(startDate, endDate);
   if (totalDays < 1) throw new Error('Minimum rental is 1 day');
 
-  const newBooking = {
+  const newBooking: Booking = {
     id: `booking_${crypto.randomUUID()}`,
     itemId,
     renterId: currentUserId,
@@ -275,8 +294,8 @@ export function createBooking({ itemId, startDate, endDate }) {
   return newBooking;
 }
 
-export function updateBookingStatus(bookingId, status) {
-  const allowed = ['approved', 'declined', 'cancelled'];
+export function updateBookingStatus(bookingId: string, status: BookingStatus): void {
+  const allowed: BookingStatus[] = ['approved', 'declined', 'cancelled'];
   if (!allowed.includes(status)) throw new Error('Invalid booking status');
 
   const bookings = getBookings();
@@ -304,7 +323,7 @@ export function updateBookingStatus(bookingId, status) {
       )
     ) {
       autoDeclinedCount += 1;
-      return { ...booking, status: 'declined' };
+      return { ...booking, status: 'declined' as BookingStatus };
     }
 
     return booking;
@@ -350,16 +369,14 @@ export function updateBookingStatus(bookingId, status) {
   }
 }
 
-export function getFavorites(userId = currentUserId) {
-  return readJson(getFavoritesKey(userId), []);
+export function getFavorites(userId: string = currentUserId): string[] {
+  return readJson<string[]>(getFavoritesKey(userId), []);
 }
 
-export function toggleFavorite(itemId, userId = currentUserId) {
+export function toggleFavorite(itemId: string, userId: string = currentUserId): string[] {
   const favorites = getFavorites(userId);
   const exists = favorites.includes(itemId);
-  const next = exists
-    ? favorites.filter((id) => id !== itemId)
-    : [...favorites, itemId];
+  const next = exists ? favorites.filter((id) => id !== itemId) : [...favorites, itemId];
 
   writeJson(getFavoritesKey(userId), next);
   return next;
