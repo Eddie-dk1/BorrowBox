@@ -1,4 +1,6 @@
-export const mockNotifications = [
+import type { Notification } from '../types/domain';
+
+export const mockNotifications: Notification[] = [
   {
     id: 'note_seed_1',
     userId: 'user_1',

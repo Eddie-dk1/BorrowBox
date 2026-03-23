@@ -1,4 +1,6 @@
-export const mockItems = [
+import type { Item } from '../types/domain';
+
+export const mockItems: Item[] = [
   {
     id: 'item_1',
     title: 'Sony A7 III Camera',
