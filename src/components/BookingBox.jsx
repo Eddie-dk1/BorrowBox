@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { createBooking, getActiveBookingsForItem, hasBookingConflict } from '../utils/store';
+import { createBooking, getActiveBookingsForItem, hasBookingConflict } from '../api/marketplaceApi';
 import { calculateTotalPrice } from '../utils/price';
 import { diffCalendarDaysInclusive } from '../utils/date';
 

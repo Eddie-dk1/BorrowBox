@@ -9,7 +9,7 @@ import {
   getItems,
   getOwnerPublicStats,
   toggleFavorite
-} from '../utils/store';
+} from '../api/marketplaceApi';
 
 const fallbackImage =
   'https://placehold.co/1200x800/f2efe8/1f1f1d?text=BorrowBox+Item';

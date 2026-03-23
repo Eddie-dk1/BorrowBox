@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getItemById, updateItem } from '../utils/store';
+import { getItemById, updateItem } from '../api/marketplaceApi';
 
 const emptyForm = {
   title: '',

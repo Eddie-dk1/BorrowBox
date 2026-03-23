@@ -9,7 +9,7 @@ import {
   getReviewsByOwnerId,
   getUserById,
   toggleFavorite
-} from '../utils/store';
+} from '../api/marketplaceApi';
 
 const responseTimeByOwner = {
   user_1: '9 min',

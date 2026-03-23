@@ -8,7 +8,7 @@ import {
   getItems,
   initializeStore,
   updateBookingStatus
-} from '../src/utils/store';
+} from '../src/api/marketplaceApi';
 
 beforeEach(() => {
   localStorage.clear();

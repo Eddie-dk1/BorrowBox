@@ -92,6 +92,7 @@ npm run build
 ## Project Status
 MVP is functional on the frontend with local persistence.
 Planned next phase: backend auth, database, and server-side business-rule enforcement.
+Current focus before backend: TypeScript migration and API-layer separation to keep development fast and reduce refactor risk.
 
 ## Commit Strategy
 Use small, scoped commits so history stays clean and reviewable.
@@ -114,3 +115,9 @@ Migration approach (incremental, not big-bang):
 1. Add React + TypeScript setup (`.tsx`, `tsconfig`, typed Vite config).
 2. Define core domain types first (`Item`, `Booking`, `Review`, `Notification`).
 3. Migrate store logic and then pages/components step by step.
+
+Progress completed:
+- TypeScript tooling added (`tsconfig.json`, `typecheck` script).
+- Core domain types introduced in `src/types/domain.ts`.
+- UI/store coupling reduced via API adapter: `src/api/marketplaceApi.ts`.
+- Existing pages/components switched to use the API adapter.

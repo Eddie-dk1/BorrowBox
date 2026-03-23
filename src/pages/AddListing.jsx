@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addItem } from '../utils/store';
+import { addItem } from '../api/marketplaceApi';
 
 const initialForm = {
   title: '',

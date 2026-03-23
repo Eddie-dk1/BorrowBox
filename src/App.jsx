@@ -11,7 +11,7 @@ import OwnerProfile from './pages/OwnerProfile';
 import Notifications from './pages/Notifications';
 import MyProfile from './pages/MyProfile';
 import EditListing from './pages/EditListing';
-import { initializeStore } from './utils/store';
+import { initializeStore } from './api/marketplaceApi';
 
 initializeStore();
 

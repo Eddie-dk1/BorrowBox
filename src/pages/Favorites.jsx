@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import ItemCard from '../components/ItemCard';
-import { getFavorites, getItems, toggleFavorite } from '../utils/store';
+import { getFavorites, getItems, toggleFavorite } from '../api/marketplaceApi';
 
 export default function Favorites() {
   const [favoriteIds, setFavoriteIds] = useState(getFavorites());

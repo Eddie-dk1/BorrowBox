@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { currentUserId } from '../data/mockUsers';
-import { getBookings, getItems, getUsers, updateBookingStatus } from '../utils/store';
+import { getBookings, getItems, getUsers, updateBookingStatus } from '../api/marketplaceApi';
 
 export default function Dashboard() {
   const [bookings, setBookings] = useState(getBookings());

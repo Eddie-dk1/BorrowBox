@@ -6,7 +6,7 @@ import {
   getNotifications,
   getUnreadNotificationsCount,
   markAllNotificationsRead
-} from '../utils/store';
+} from '../api/marketplaceApi';
 
 const links = [
   { to: '/catalog', label: 'Catalog' },

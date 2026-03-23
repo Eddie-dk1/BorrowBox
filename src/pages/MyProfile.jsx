@@ -8,7 +8,7 @@ import {
   getItems,
   getOwnerPublicStats,
   getReviewsByOwnerId
-} from '../utils/store';
+} from '../api/marketplaceApi';
 
 export default function MyProfile() {
   const currentUser = getCurrentUser();

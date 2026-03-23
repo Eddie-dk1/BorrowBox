@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ItemCard from '../components/ItemCard';
 import SearchBar from '../components/SearchBar';
-import { getFavorites, getItems, toggleFavorite } from '../utils/store';
+import { getFavorites, getItems, toggleFavorite } from '../api/marketplaceApi';
 
 const chips = ['Cameras', 'Gaming', 'Audio', 'Laptops', 'Projectors'];
 const trustStats = [

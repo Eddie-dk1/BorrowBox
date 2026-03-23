@@ -3,7 +3,7 @@ import {
   getNotifications,
   markAllNotificationsRead,
   markNotificationRead
-} from '../utils/store';
+} from '../api/marketplaceApi';
 
 const filters = ['all', 'unread', 'booking', 'system'];
 

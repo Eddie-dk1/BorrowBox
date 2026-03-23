@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import Filters from '../components/Filters';
 import ItemCard from '../components/ItemCard';
 import SearchBar from '../components/SearchBar';
-import { getFavorites, getItems, toggleFavorite } from '../utils/store';
+import { getFavorites, getItems, toggleFavorite } from '../api/marketplaceApi';
 
 export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
