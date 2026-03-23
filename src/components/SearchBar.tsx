@@ -1,16 +1,30 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 
-export default function SearchBar({ initialValues, onSearch, showDates = false }) {
+export interface SearchFormValues {
+  q: string;
+  category: string;
+  city: string;
+  startDate: string;
+  endDate: string;
+}
+
+interface SearchBarProps {
+  initialValues?: SearchFormValues;
+  onSearch: (values: SearchFormValues) => void;
+  showDates?: boolean;
+}
+
+export default function SearchBar({ initialValues, onSearch, showDates = false }: SearchBarProps) {
   const [form, setForm] = useState(
     initialValues || { q: '', category: 'All', city: '', startDate: '', endDate: '' }
   );
 
-  function handleChange(event) {
+  function handleChange(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function submit(event) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     onSearch(form);
   }

@@ -1,10 +1,17 @@
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { Item } from '../types/domain';
 
 const fallbackImage =
   'https://placehold.co/1200x800/f2efe8/1f1f1d?text=BorrowBox+Item';
 
-export default function ItemCard({ item, isFavorite, onToggleFavorite }) {
+interface ItemCardProps {
+  item: Item;
+  isFavorite: boolean;
+  onToggleFavorite: (itemId: string) => void;
+}
+
+export default function ItemCard({ item, isFavorite, onToggleFavorite }: ItemCardProps) {
   return (
     <article className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative">

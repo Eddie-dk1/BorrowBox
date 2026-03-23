@@ -1,5 +1,20 @@
-export default function Filters({ values, onChange }) {
-  function update(event) {
+import type { ChangeEvent } from 'react';
+
+export interface FilterValues {
+  category: string;
+  city: string;
+  minPrice: string;
+  maxPrice: string;
+  sort: 'newest' | 'cheapest' | 'expensive' | string;
+}
+
+interface FiltersProps {
+  values: FilterValues;
+  onChange: (values: FilterValues) => void;
+}
+
+export default function Filters({ values, onChange }: FiltersProps) {
+  function update(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     onChange({ ...values, [event.target.name]: event.target.value });
   }
 

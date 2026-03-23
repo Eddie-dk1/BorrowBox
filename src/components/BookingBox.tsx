@@ -1,9 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { createBooking, getActiveBookingsForItem, hasBookingConflict } from '../api/marketplaceApi';
 import { calculateTotalPrice } from '../utils/price';
 import { diffCalendarDaysInclusive } from '../utils/date';
+import type { Item } from '../types/domain';
 
-export default function BookingBox({ item }) {
+interface BookingBoxProps {
+  item: Item;
+}
+
+export default function BookingBox({ item }: BookingBoxProps) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [message, setMessage] = useState('');
@@ -32,7 +37,7 @@ export default function BookingBox({ item }) {
   const isInvalidRange = !!startDate && !!endDate && endDate < startDate;
   const canSubmit = !!startDate && !!endDate && !isInvalidRange && !liveConflict;
 
-  function submit(event) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     setMessage('');
@@ -42,7 +47,7 @@ export default function BookingBox({ item }) {
       setMessage('Request sent. Owner will review it.');
       setBookingsVersion((value) => value + 1);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Failed to create booking');
     }
   }
 

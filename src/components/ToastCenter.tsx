@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+interface ToastPayload {
+  id: string;
+  message: string;
+  link?: string;
+}
+
 export default function ToastCenter() {
   const navigate = useNavigate();
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState<ToastPayload[]>([]);
 
   useEffect(() => {
-    function onToast(event) {
-      const payload = event.detail;
+    function onToast(event: Event) {
+      const payload = (event as CustomEvent<ToastPayload>).detail;
       if (!payload?.id) return;
       setToasts((prev) => [payload, ...prev].slice(0, 4));
 

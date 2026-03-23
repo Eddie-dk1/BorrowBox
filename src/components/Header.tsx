@@ -8,8 +8,9 @@ import {
   markAllNotificationsRead
 } from '../api/marketplaceApi';
 import { clearSession } from '../utils/auth';
+import type { Notification } from '../types/domain';
 
-const links = [
+const links: Array<{ to: string; label: string }> = [
   { to: '/catalog', label: 'Catalog' },
   { to: '/add-listing', label: 'Add listing' },
   { to: '/favorites', label: 'Favorites' },
@@ -21,7 +22,7 @@ export default function Header() {
   const navigate = useNavigate();
   const currentUser = getCurrentUser();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(getNotifications());
+  const [notifications, setNotifications] = useState<Notification[]>(getNotifications());
   const [unreadCount, setUnreadCount] = useState(getUnreadNotificationsCount());
 
   useEffect(() => {
