@@ -4,12 +4,13 @@ import {
   markAllNotificationsRead,
   markNotificationRead
 } from '../api/marketplaceApi';
+import type { Notification } from '../types/domain';
 
-const filters = ['all', 'unread', 'booking', 'system'];
+const filters = ['all', 'unread', 'booking', 'system'] as const;
 
 export default function Notifications() {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [notifications, setNotifications] = useState(getNotifications());
+  const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'booking' | 'system'>('all');
+  const [notifications, setNotifications] = useState<Notification[]>(getNotifications());
 
   const filtered = useMemo(() => {
     if (activeFilter === 'all') return notifications;
@@ -23,7 +24,7 @@ export default function Notifications() {
     setNotifications(getNotifications());
   }
 
-  function onMarkRead(notificationId) {
+  function onMarkRead(notificationId: string) {
     markNotificationRead(notificationId);
     setNotifications(getNotifications());
   }

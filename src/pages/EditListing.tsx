@@ -1,8 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getItemById, updateItem } from '../api/marketplaceApi';
 
-const emptyForm = {
+interface ListingFormState {
+  title: string;
+  category: string;
+  pricePerDay: string;
+  city: string;
+  condition: string;
+  description: string;
+  image: string;
+  deposit: string;
+}
+
+const emptyForm: ListingFormState = {
   title: '',
   category: 'Cameras',
   pricePerDay: '',
@@ -14,13 +25,17 @@ const emptyForm = {
 };
 
 export default function EditListing() {
-  const { itemId } = useParams();
+  const { itemId } = useParams<{ itemId: string }>();
   const navigate = useNavigate();
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
 
   useEffect(() => {
+    if (!itemId) {
+      setError('Listing not found');
+      return;
+    }
     const item = getItemById(itemId);
     if (!item) {
       setError('Listing not found');
@@ -39,23 +54,23 @@ export default function EditListing() {
     });
   }, [itemId]);
 
-  function update(event) {
+  function update(event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     if (event.target.name === 'image') {
       setSelectedFileName('');
     }
     setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   }
 
-  function fileToDataUrl(file) {
+  function fileToDataUrl(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
+      reader.onload = () => resolve(String(reader.result || ''));
       reader.onerror = () => reject(new Error('Failed to read selected file'));
       reader.readAsDataURL(file);
     });
   }
 
-  async function onImageFileChange(event) {
+  async function onImageFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -65,13 +80,17 @@ export default function EditListing() {
       setSelectedFileName(file.name);
       setError('');
     } catch (err) {
-      setError(err.message || 'Could not upload this image');
+      setError(err instanceof Error ? err.message : 'Could not upload this image');
     }
   }
 
-  function submit(event) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
+    if (!itemId) {
+      setError('Listing not found');
+      return;
+    }
 
     if (!form.title || !form.pricePerDay || !form.city || !form.description || !form.image) {
       setError('Please fill all required fields');
@@ -80,9 +99,10 @@ export default function EditListing() {
 
     try {
       const updated = updateItem(itemId, form);
+      if (!updated) throw new Error('Failed to update listing');
       navigate(`/item/${updated.id}`);
     } catch (err) {
-      setError(err.message || 'Failed to update listing');
+      setError(err instanceof Error ? err.message : 'Failed to update listing');
     }
   }
 

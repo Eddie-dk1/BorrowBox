@@ -15,9 +15,9 @@ const fallbackImage =
   'https://placehold.co/1200x800/f2efe8/1f1f1d?text=BorrowBox+Item';
 
 export default function ItemDetails() {
-  const { itemId } = useParams();
-  const item = getItemById(itemId);
-  const [favorites, setFavorites] = useState(getFavorites());
+  const { itemId } = useParams<{ itemId: string }>();
+  const item = itemId ? getItemById(itemId) : undefined;
+  const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const ownerStats = useMemo(
     () => (item ? getOwnerPublicStats(item.ownerId) : null),
     [item]
@@ -35,10 +35,10 @@ export default function ItemDetails() {
         (booking) =>
           booking.itemId === item.id && ['pending', 'approved'].includes(booking.status)
       )
-      .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   }, [item]);
 
-  function handleToggleFavorite(targetItemId) {
+  function handleToggleFavorite(targetItemId: string) {
     setFavorites(toggleFavorite(targetItemId));
   }
 

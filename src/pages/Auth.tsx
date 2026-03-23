@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addUser, authenticateUser } from '../api/marketplaceApi';
 import { setSessionUserId } from '../utils/auth';
@@ -14,7 +14,7 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState('');
   const [error, setError] = useState('');
 
-  function signIn(event) {
+  function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
 
@@ -23,11 +23,11 @@ export default function Auth() {
       setSessionUserId(user.id);
       navigate('/', { replace: true });
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Login failed');
     }
   }
 
-  function signUp(event) {
+  function signUp(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
 
@@ -41,7 +41,7 @@ export default function Auth() {
       setSessionUserId(user.id);
       navigate('/', { replace: true });
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Sign up failed');
     }
   }
 

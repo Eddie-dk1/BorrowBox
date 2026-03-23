@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addItem } from '../api/marketplaceApi';
 
-const initialForm = {
+interface ListingFormState {
+  title: string;
+  category: string;
+  pricePerDay: string;
+  city: string;
+  condition: string;
+  description: string;
+  image: string;
+  deposit: string;
+}
+
+const initialForm: ListingFormState = {
   title: '',
   category: 'Cameras',
   pricePerDay: '',
@@ -19,23 +30,23 @@ export default function AddListing() {
   const [error, setError] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
 
-  function update(event) {
+  function update(event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     if (event.target.name === 'image') {
       setSelectedFileName('');
     }
     setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   }
 
-  function fileToDataUrl(file) {
+  function fileToDataUrl(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
+      reader.onload = () => resolve(String(reader.result || ''));
       reader.onerror = () => reject(new Error('Failed to read selected file'));
       reader.readAsDataURL(file);
     });
   }
 
-  async function onImageFileChange(event) {
+  async function onImageFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -45,11 +56,11 @@ export default function AddListing() {
       setSelectedFileName(file.name);
       setError('');
     } catch (err) {
-      setError(err.message || 'Could not upload this image');
+      setError(err instanceof Error ? err.message : 'Could not upload this image');
     }
   }
 
-  function submit(event) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
 

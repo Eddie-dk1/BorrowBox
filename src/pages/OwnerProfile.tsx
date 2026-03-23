@@ -11,27 +11,43 @@ import {
   toggleFavorite
 } from '../api/marketplaceApi';
 
-const responseTimeByOwner = {
+const responseTimeByOwner: Record<string, string> = {
   user_1: '9 min',
   user_2: '12 min',
   user_3: '16 min'
 };
 
 export default function OwnerProfile() {
-  const { ownerId } = useParams();
-  const owner = getUserById(ownerId);
-  const [favorites, setFavorites] = useState(getFavorites());
+  const { ownerId } = useParams<{ ownerId: string }>();
+  const owner = ownerId ? getUserById(ownerId) : undefined;
+  const [favorites, setFavorites] = useState<string[]>(getFavorites());
 
-  const ownerListings = useMemo(
-    () => getItems().filter((item) => item.ownerId === ownerId),
-    [ownerId]
-  );
-  const ownerBookings = useMemo(
-    () => getBookings().filter((booking) => booking.ownerId === ownerId),
-    [ownerId]
-  );
-  const reviews = useMemo(() => getReviewsByOwnerId(ownerId), [ownerId]);
-  const stats = useMemo(() => getOwnerPublicStats(ownerId), [ownerId]);
+  const ownerListings = useMemo(() => {
+    if (!ownerId) return [];
+    return getItems().filter((item) => item.ownerId === ownerId);
+  }, [ownerId]);
+  const ownerBookings = useMemo(() => {
+    if (!ownerId) return [];
+    return getBookings().filter((booking) => booking.ownerId === ownerId);
+  }, [ownerId]);
+  const reviews = useMemo(() => {
+    if (!ownerId) return [];
+    return getReviewsByOwnerId(ownerId);
+  }, [ownerId]);
+  const stats = useMemo(() => {
+    if (!ownerId) {
+      return {
+        listingCount: 0,
+        requestsReceived: 0,
+        approvedCount: 0,
+        pendingCount: 0,
+        revenueApproved: 0,
+        reviewCount: 0,
+        avgRating: 0
+      };
+    }
+    return getOwnerPublicStats(ownerId);
+  }, [ownerId]);
 
   if (!owner) {
     return (
@@ -46,7 +62,7 @@ export default function OwnerProfile() {
 
   const rating = stats.avgRating ? stats.avgRating.toFixed(1) : 'New';
 
-  function handleToggleFavorite(itemId) {
+  function handleToggleFavorite(itemId: string) {
     setFavorites(toggleFavorite(itemId));
   }
 
@@ -67,7 +83,7 @@ export default function OwnerProfile() {
           </div>
           <div className="rounded-xl bg-neutral-50 p-3">
             <p className="text-neutral-500">Response</p>
-            <p className="font-semibold">{responseTimeByOwner[ownerId] || '15 min'}</p>
+            <p className="font-semibold">{responseTimeByOwner[owner.id] || '15 min'}</p>
           </div>
           <div className="rounded-xl bg-neutral-50 p-3">
             <p className="text-neutral-500">Approved</p>

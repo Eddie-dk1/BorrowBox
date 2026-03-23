@@ -1,16 +1,23 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getBookings, getCurrentUser, getItems, getUsers, updateBookingStatus } from '../api/marketplaceApi';
+import type { Booking, BookingStatus, Item, User } from '../types/domain';
 
 export default function Dashboard() {
   const currentUserId = getCurrentUser().id;
-  const [bookings, setBookings] = useState(getBookings());
-  const [activeTab, setActiveTab] = useState('queue');
+  const [bookings, setBookings] = useState<Booking[]>(getBookings());
+  const [activeTab, setActiveTab] = useState<'queue' | 'history'>('queue');
   const items = getItems();
   const users = getUsers();
 
-  const itemMap = useMemo(() => Object.fromEntries(items.map((item) => [item.id, item])), [items]);
-  const userMap = useMemo(() => Object.fromEntries(users.map((user) => [user.id, user])), [users]);
+  const itemMap = useMemo<Record<string, Item>>(
+    () => Object.fromEntries(items.map((item) => [item.id, item])),
+    [items]
+  );
+  const userMap = useMemo<Record<string, User>>(
+    () => Object.fromEntries(users.map((user) => [user.id, user])),
+    [users]
+  );
 
   const incomingRequests = useMemo(
     () => bookings.filter((booking) => booking.ownerId === currentUserId),
@@ -21,7 +28,7 @@ export default function Dashboard() {
     return [...incomingRequests].sort((a, b) => {
       const statusDiff = (priority[a.status] ?? 9) - (priority[b.status] ?? 9);
       if (statusDiff !== 0) return statusDiff;
-      return new Date(b.createdAt) - new Date(a.createdAt);
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [incomingRequests]);
   const queueRequests = useMemo(
@@ -33,27 +40,30 @@ export default function Dashboard() {
     [sortedIncomingRequests]
   );
   const recentActivity = useMemo(
-    () => [...bookings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6),
+    () =>
+      [...bookings]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 6),
     [bookings]
   );
 
-  function onStatusChange(bookingId, status) {
+  function onStatusChange(bookingId: string, status: BookingStatus) {
     updateBookingStatus(bookingId, status);
     setBookings(getBookings());
   }
 
-  function statusClasses(status) {
+  function statusClasses(status: BookingStatus) {
     if (status === 'approved') return 'bg-green-50 text-green-700';
     if (status === 'declined') return 'bg-red-50 text-red-700';
     if (status === 'cancelled') return 'bg-neutral-100 text-neutral-700';
     return 'bg-amber-50 text-amber-700';
   }
 
-  function formatDateRange(startDate, endDate) {
+  function formatDateRange(startDate: string, endDate: string) {
     return `${startDate} to ${endDate}`;
   }
 
-  function formatMoney(amount) {
+  function formatMoney(amount: number) {
     return `$${Number(amount || 0).toFixed(0)}`;
   }
 

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ItemCard from '../components/ItemCard';
 import SearchBar from '../components/SearchBar';
+import type { SearchFormValues } from '../components/SearchBar';
 import { getFavorites, getItems, toggleFavorite } from '../api/marketplaceApi';
 
 const chips = ['Cameras', 'Gaming', 'Audio', 'Laptops', 'Projectors'];
@@ -25,12 +26,12 @@ const testimonials = [
 
 export default function Home() {
   const navigate = useNavigate();
-  const [favorites, setFavorites] = useState(getFavorites());
+  const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const [items] = useState(getItems);
 
   const featured = useMemo(() => items.slice(0, 6), [items]);
 
-  function handleSearch(form) {
+  function handleSearch(form: SearchFormValues) {
     const params = new URLSearchParams();
     if (form.q) params.set('q', form.q);
     if (form.category && form.category !== 'All') params.set('category', form.category);
@@ -38,11 +39,11 @@ export default function Home() {
     navigate(`/catalog?${params.toString()}`);
   }
 
-  function handleChip(category) {
+  function handleChip(category: string) {
     navigate(`/catalog?category=${encodeURIComponent(category)}`);
   }
 
-  function handleToggleFavorite(itemId) {
+  function handleToggleFavorite(itemId: string) {
     setFavorites(toggleFavorite(itemId));
   }
 

@@ -3,7 +3,7 @@ import ItemCard from '../components/ItemCard';
 import { getFavorites, getItems, toggleFavorite } from '../api/marketplaceApi';
 
 export default function Favorites() {
-  const [favoriteIds, setFavoriteIds] = useState(getFavorites());
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(getFavorites());
   const items = getItems();
 
   const favoriteItems = useMemo(
@@ -11,7 +11,7 @@ export default function Favorites() {
     [items, favoriteIds]
   );
 
-  function handleToggleFavorite(itemId) {
+  function handleToggleFavorite(itemId: string) {
     setFavoriteIds(toggleFavorite(itemId));
   }
 

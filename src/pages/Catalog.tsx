@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Filters from '../components/Filters';
+import type { FilterValues } from '../components/Filters';
 import ItemCard from '../components/ItemCard';
 import SearchBar from '../components/SearchBar';
+import type { SearchFormValues } from '../components/SearchBar';
 import { getFavorites, getItems, toggleFavorite } from '../api/marketplaceApi';
 
 export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [favorites, setFavorites] = useState(getFavorites());
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterValues>({
     category: searchParams.get('category') || 'All',
     city: searchParams.get('city') || '',
     minPrice: '',
@@ -37,11 +39,11 @@ export default function Catalog() {
     return base.sort((a, b) => {
       if (filters.sort === 'cheapest') return a.pricePerDay - b.pricePerDay;
       if (filters.sort === 'expensive') return b.pricePerDay - a.pricePerDay;
-      return new Date(b.createdAt) - new Date(a.createdAt);
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [items, q, filters]);
 
-  function handleSearch(form) {
+  function handleSearch(form: SearchFormValues) {
     const params = new URLSearchParams();
     if (form.q) params.set('q', form.q);
     if (form.category && form.category !== 'All') params.set('category', form.category);
@@ -50,7 +52,7 @@ export default function Catalog() {
     setFilters((prev) => ({ ...prev, category: form.category, city: form.city }));
   }
 
-  function handleToggleFavorite(itemId) {
+  function handleToggleFavorite(itemId: string) {
     setFavorites(toggleFavorite(itemId));
   }
 
@@ -60,7 +62,7 @@ export default function Catalog() {
     filters.city ? `City: ${filters.city}` : null,
     filters.minPrice ? `Min: $${filters.minPrice}` : null,
     filters.maxPrice ? `Max: $${filters.maxPrice}` : null
-  ].filter(Boolean);
+  ].filter((tag): tag is string => Boolean(tag));
 
   return (
     <section className="space-y-4">
