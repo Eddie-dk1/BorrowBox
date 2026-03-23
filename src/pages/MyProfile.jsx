@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { currentUserId } from '../data/mockUsers';
 import {
   getBookings,
   getCurrentUser,
@@ -12,6 +11,7 @@ import {
 
 export default function MyProfile() {
   const currentUser = getCurrentUser();
+  const currentUserId = currentUser.id;
   const items = getItems();
   const bookings = getBookings();
   const ownerStats = getOwnerPublicStats(currentUserId);

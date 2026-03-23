@@ -4,6 +4,7 @@ import type {
   BookingStatus,
   CreateBookingInput,
   CreateItemInput,
+  CreateUserInput,
   Item,
   Notification,
   OwnerPublicStats,
@@ -20,6 +21,12 @@ export function getUsers(): User[] {
 }
 export function getUserById(userId: string): User | undefined {
   return store.getUserById(userId);
+}
+export function addUser(payload: CreateUserInput): User {
+  return store.addUser(payload);
+}
+export function authenticateUser(email: string, password: string): User {
+  return store.authenticateUser(email, password);
 }
 export function getCurrentUser(): User {
   return store.getCurrentUser();

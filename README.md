@@ -12,6 +12,7 @@ BorrowBox currently supports a full local MVP flow:
 - Add and edit your own listings (including local photo upload)
 - View notifications (bell dropdown + notifications page)
 - Use a personal `My Profile` page for owner/renter summary
+- Authentication gate with `Sign in / Sign up` page before accessing app routes
 
 ## Key Features Implemented
 
@@ -40,6 +41,14 @@ BorrowBox currently supports a full local MVP flow:
   - recent reviews
 - `Owner Profile` page with public stats, reviews, and active listings
 
+### Auth (MVP Local)
+- First-time visitors are redirected to `/auth`
+- Sign in with email + password
+- Sign up creates a local user profile with name, city, email, and password
+- City input accepts any city text
+- Session is persisted in `localStorage`
+- Log out returns user to auth screen
+
 ### Notifications
 - Header bell with unread badge
 - Notification dropdown and full notifications page
@@ -58,6 +67,7 @@ BorrowBox currently supports a full local MVP flow:
 - `/notifications`
 - `/my-profile`
 - `/owner/:ownerId`
+- `/auth`
 
 ## Data and Persistence
 - Mock seed data + `localStorage`

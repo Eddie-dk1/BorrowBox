@@ -1,4 +1,5 @@
 export const STORAGE_KEYS = {
+  users: 'borrowbox_users',
   items: 'borrowbox_items',
   bookings: 'borrowbox_bookings',
   reviews: 'borrowbox_reviews',

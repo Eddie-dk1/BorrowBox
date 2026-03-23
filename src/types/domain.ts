@@ -8,10 +8,19 @@ export interface User {
   id: string;
   name: string;
   city: string;
+  email: string;
+  password: string;
   joinedAt?: string;
   avatar?: string;
   rating?: number;
   reviewCount?: number;
+}
+
+export interface CreateUserInput {
+  name: string;
+  city: string;
+  email: string;
+  password: string;
 }
 
 export interface Item {

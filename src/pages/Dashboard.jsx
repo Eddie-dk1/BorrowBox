@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { currentUserId } from '../data/mockUsers';
-import { getBookings, getItems, getUsers, updateBookingStatus } from '../api/marketplaceApi';
+import { getBookings, getCurrentUser, getItems, getUsers, updateBookingStatus } from '../api/marketplaceApi';
 
 export default function Dashboard() {
+  const currentUserId = getCurrentUser().id;
   const [bookings, setBookings] = useState(getBookings());
   const [activeTab, setActiveTab] = useState('queue');
   const items = getItems();

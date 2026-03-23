@@ -5,6 +5,7 @@ import { currentUserId, mockUsers } from '../data/mockUsers';
 import type {
   Booking,
   BookingStatus,
+  CreateUserInput,
   CreateBookingInput,
   CreateItemInput,
   Item,
@@ -15,6 +16,7 @@ import type {
   UpdateItemInput,
   User
 } from '../types/domain';
+import { getSessionUserId } from './auth';
 import { diffCalendarDaysInclusive, rangesOverlap } from './date';
 import { calculateTotalPrice } from './price';
 import { readJson, STORAGE_KEYS, writeJson } from './storage';
@@ -26,6 +28,14 @@ const NEW_MACBOOK_IMAGE =
 
 function getFavoritesKey(userId: string = currentUserId): string {
   return `borrowbox_favorites_${userId}`;
+}
+
+function getActiveUserId(): string {
+  return getSessionUserId() || currentUserId;
+}
+
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
 }
 
 function emitNotificationsChanged(): void {
@@ -41,6 +51,9 @@ function emitToast(payload: { id: string; message: string; link: string }): void
 }
 
 export function initializeStore(): void {
+  if (!localStorage.getItem(STORAGE_KEYS.users)) {
+    writeJson(STORAGE_KEYS.users, mockUsers);
+  }
   if (!localStorage.getItem(STORAGE_KEYS.items)) {
     writeJson(STORAGE_KEYS.items, mockItems);
   }
@@ -57,6 +70,18 @@ export function initializeStore(): void {
     writeJson(getFavoritesKey(), [] as string[]);
   }
 
+  const users = readJson<User[]>(STORAGE_KEYS.users, mockUsers as User[]);
+  const migratedUsers = users.map((user) => {
+    if (user.email && user.password) return user;
+    const fallbackEmail = `${user.name.toLowerCase().replace(/\s+/g, '.')}@borrowbox.local`;
+    return {
+      ...user,
+      email: user.email || fallbackEmail,
+      password: user.password || 'demo12345'
+    };
+  });
+  writeJson(STORAGE_KEYS.users, migratedUsers);
+
   const items = readJson<Item[]>(STORAGE_KEYS.items, []);
   const migrated = items.map((item) => {
     if (item.id === 'item_3' && item.image === OLD_MACBOOK_IMAGE) {
@@ -68,15 +93,56 @@ export function initializeStore(): void {
 }
 
 export function getUsers(): User[] {
-  return mockUsers;
+  return readJson<User[]>(STORAGE_KEYS.users, mockUsers as User[]);
 }
 
 export function getUserById(userId: string): User | undefined {
-  return mockUsers.find((user) => user.id === userId);
+  return getUsers().find((user) => user.id === userId);
 }
 
 export function getCurrentUser(): User {
-  return (mockUsers.find((user) => user.id === currentUserId) || mockUsers[0]) as User;
+  const userId = getActiveUserId();
+  const users = getUsers();
+  return (users.find((user) => user.id === userId) || users[0]) as User;
+}
+
+export function addUser(payload: CreateUserInput): User {
+  const name = payload.name.trim();
+  const city = payload.city.trim();
+  const email = normalizeEmail(payload.email);
+  const password = payload.password.trim();
+  if (!name || !city || !email || !password) {
+    throw new Error('Name, city, email, and password are required');
+  }
+  if (!email.includes('@')) {
+    throw new Error('Enter a valid email');
+  }
+  if (password.length < 6) {
+    throw new Error('Password must be at least 6 characters');
+  }
+
+  const users = getUsers();
+  if (users.some((user) => normalizeEmail(user.email) === email)) {
+    throw new Error('Email is already in use');
+  }
+  const newUser: User = {
+    id: `user_${crypto.randomUUID()}`,
+    name,
+    city,
+    email,
+    password
+  };
+  writeJson(STORAGE_KEYS.users, [newUser, ...users]);
+  return newUser;
+}
+
+export function authenticateUser(email: string, password: string): User {
+  const normalizedEmail = normalizeEmail(email);
+  const user = getUsers().find((entry) => normalizeEmail(entry.email) === normalizedEmail);
+  if (!user || user.password !== password) {
+    throw new Error('Invalid email or password');
+  }
+  return user;
 }
 
 export function getItems(): Item[] {
@@ -111,10 +177,11 @@ export function addItem(payload: CreateItemInput): Item {
 }
 
 export function updateItem(itemId: string, payload: UpdateItemInput): Item | undefined {
+  const activeUserId = getActiveUserId();
   const items = getItems();
   const existing = items.find((item) => item.id === itemId);
   if (!existing) throw new Error('Item not found');
-  if (existing.ownerId !== currentUserId) throw new Error('Only owner can edit this listing');
+  if (existing.ownerId !== activeUserId) throw new Error('Only owner can edit this listing');
 
   const next = items.map((item) => {
     if (item.id !== itemId) return item;
@@ -140,8 +207,9 @@ export function getBookings(): Booking[] {
 }
 
 export function getNotifications(): Notification[] {
+  const activeUserId = getActiveUserId();
   return readJson<Notification[]>(STORAGE_KEYS.notifications, [])
-    .filter((notification) => notification.userId === currentUserId)
+    .filter((notification) => notification.userId === activeUserId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
@@ -150,9 +218,10 @@ export function getUnreadNotificationsCount(): number {
 }
 
 export function markAllNotificationsRead(): void {
+  const activeUserId = getActiveUserId();
   const notifications = readJson<Notification[]>(STORAGE_KEYS.notifications, []);
   const next = notifications.map((notification) => {
-    if (notification.userId !== currentUserId) return notification;
+    if (notification.userId !== activeUserId) return notification;
     return { ...notification, isRead: true };
   });
   writeJson(STORAGE_KEYS.notifications, next);
@@ -160,10 +229,11 @@ export function markAllNotificationsRead(): void {
 }
 
 export function markNotificationRead(notificationId: string): void {
+  const activeUserId = getActiveUserId();
   const notifications = readJson<Notification[]>(STORAGE_KEYS.notifications, []);
   const next = notifications.map((notification) => {
     if (notification.id !== notificationId) return notification;
-    if (notification.userId !== currentUserId) return notification;
+    if (notification.userId !== activeUserId) return notification;
     return { ...notification, isRead: true };
   });
   writeJson(STORAGE_KEYS.notifications, next);
@@ -194,7 +264,7 @@ function addNotification({
   const next = [newNotification, ...notifications];
   writeJson(STORAGE_KEYS.notifications, next);
   emitNotificationsChanged();
-  if (userId === currentUserId) {
+  if (userId === getActiveUserId()) {
     emitToast({
       id: newNotification.id,
       message: newNotification.message,
@@ -257,9 +327,10 @@ export function hasBookingConflict(itemId: string, startDate: string, endDate: s
 }
 
 export function createBooking({ itemId, startDate, endDate }: CreateBookingInput): Booking {
+  const activeUserId = getActiveUserId();
   const item = getItemById(itemId);
   if (!item) throw new Error('Item not found');
-  if (item.ownerId === currentUserId) throw new Error('You cannot book your own item');
+  if (item.ownerId === activeUserId) throw new Error('You cannot book your own item');
   if (!startDate || !endDate) throw new Error('Both dates are required');
   if (endDate < startDate) throw new Error('End date must be after start date');
   if (hasConflict(itemId, startDate, endDate)) {
@@ -272,7 +343,7 @@ export function createBooking({ itemId, startDate, endDate }: CreateBookingInput
   const newBooking: Booking = {
     id: `booking_${crypto.randomUUID()}`,
     itemId,
-    renterId: currentUserId,
+    renterId: activeUserId,
     ownerId: item.ownerId,
     startDate,
     endDate,
@@ -295,13 +366,14 @@ export function createBooking({ itemId, startDate, endDate }: CreateBookingInput
 }
 
 export function updateBookingStatus(bookingId: string, status: BookingStatus): void {
+  const activeUserId = getActiveUserId();
   const allowed: BookingStatus[] = ['approved', 'declined', 'cancelled'];
   if (!allowed.includes(status)) throw new Error('Invalid booking status');
 
   const bookings = getBookings();
   const targetBooking = bookings.find((booking) => booking.id === bookingId);
   if (!targetBooking) throw new Error('Booking not found');
-  if (targetBooking.ownerId !== currentUserId) {
+  if (targetBooking.ownerId !== activeUserId) {
     throw new Error('Only owner can update status');
   }
 
@@ -369,11 +441,11 @@ export function updateBookingStatus(bookingId: string, status: BookingStatus): v
   }
 }
 
-export function getFavorites(userId: string = currentUserId): string[] {
+export function getFavorites(userId: string = getActiveUserId()): string[] {
   return readJson<string[]>(getFavoritesKey(userId), []);
 }
 
-export function toggleFavorite(itemId: string, userId: string = currentUserId): string[] {
+export function toggleFavorite(itemId: string, userId: string = getActiveUserId()): string[] {
   const favorites = getFavorites(userId);
   const exists = favorites.includes(itemId);
   const next = exists ? favorites.filter((id) => id !== itemId) : [...favorites, itemId];

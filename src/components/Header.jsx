@@ -1,12 +1,13 @@
 import { Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   getCurrentUser,
   getNotifications,
   getUnreadNotificationsCount,
   markAllNotificationsRead
 } from '../api/marketplaceApi';
+import { clearSession } from '../utils/auth';
 
 const links = [
   { to: '/catalog', label: 'Catalog' },
@@ -17,6 +18,7 @@ const links = [
 ];
 
 export default function Header() {
+  const navigate = useNavigate();
   const currentUser = getCurrentUser();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState(getNotifications());
@@ -38,6 +40,11 @@ export default function Header() {
     markAllNotificationsRead();
     setNotifications(getNotifications());
     setUnreadCount(getUnreadNotificationsCount());
+  }
+
+  function onLogout() {
+    clearSession();
+    navigate('/auth', { replace: true });
   }
 
   return (
@@ -130,6 +137,13 @@ export default function Header() {
               </div>
             ) : null}
           </div>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="rounded-full border border-line px-3 py-1.5 text-sm text-neutral-700 hover:bg-line"
+          >
+            Log out
+          </button>
         </nav>
       </div>
     </header>
