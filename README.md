@@ -101,3 +101,16 @@ Recommended commit types:
 - `feat(logic): ...` for store/business rules/data-flow updates
 - `test: ...` for test additions or test-only changes
 - `docs: ...` for README/spec/documentation updates
+
+## TypeScript Plan
+TypeScript migration is the next recommended step.
+
+Why now:
+- The MVP has enough flows and entities to benefit from strict typing.
+- It will reduce bugs in booking/state logic and make refactors safer.
+- It will simplify future backend/API integration.
+
+Migration approach (incremental, not big-bang):
+1. Add React + TypeScript setup (`.tsx`, `tsconfig`, typed Vite config).
+2. Define core domain types first (`Item`, `Booking`, `Review`, `Notification`).
+3. Migrate store logic and then pages/components step by step.
