@@ -71,14 +71,15 @@ BorrowBox currently supports a full local MVP flow:
 
 ## Data and Persistence
 - Mock seed data + `localStorage`
-- Active mock user: `user_1`
+- Active user comes from local auth session (`borrowbox_session_user_id`)
 
 Storage keys:
+- `borrowbox_users`
 - `borrowbox_items`
 - `borrowbox_bookings`
 - `borrowbox_reviews`
 - `borrowbox_notifications`
-- `borrowbox_favorites_user_1`
+- `borrowbox_favorites_<userId>`
 
 ## Tech Stack
 - React + Vite
@@ -101,8 +102,8 @@ npm run build
 
 ## Project Status
 MVP is functional on the frontend with local persistence.
-Planned next phase: backend auth, database, and server-side business-rule enforcement.
-Current focus before backend: TypeScript migration and API-layer separation to keep development fast and reduce refactor risk.
+TypeScript migration (Step 1) is complete across app entrypoints, pages, components, store, and seed data with `allowJs: false`.
+Current focus before backend: architecture hardening and test expansion.
 
 ## Commit Strategy
 Use small, scoped commits so history stays clean and reviewable.
@@ -114,14 +115,14 @@ Recommended commit types:
 - `docs: ...` for README/spec/documentation updates
 
 ## TypeScript Plan
-TypeScript migration is the next recommended step.
+TypeScript migration has been completed.
 
 Why now:
 - The MVP has enough flows and entities to benefit from strict typing.
 - It will reduce bugs in booking/state logic and make refactors safer.
 - It will simplify future backend/API integration.
 
-Migration approach (incremental, not big-bang):
+Migration approach used (incremental, not big-bang):
 1. Add React + TypeScript setup (`.tsx`, `tsconfig`, typed Vite config).
 2. Define core domain types first (`Item`, `Booking`, `Review`, `Notification`).
 3. Migrate store logic and then pages/components step by step.
@@ -133,3 +134,13 @@ Progress completed:
 - Existing pages/components switched to use the API adapter.
 - Core utility/business modules migrated to TypeScript:
   `src/utils/storage.ts`, `src/utils/date.ts`, `src/utils/price.ts`, `src/utils/store.ts`.
+- App entrypoints migrated: `src/App.tsx`, `src/main.tsx`.
+- Mock data migrated: `src/data/mockItems.ts`, `src/data/mockNotifications.ts`,
+  `src/data/mockReviews.ts`, `src/data/mockUsers.ts`.
+- Strict TS mode now enforced with `allowJs: false`.
+
+## Next Steps
+1. Backend-ready architecture hardening without full backend:
+   split API services, typed DTOs, standardized error/result handling, storage migration versioning.
+2. Testing hardening:
+   auth flow tests, listing add/edit integration tests, booking/notification integration tests.
