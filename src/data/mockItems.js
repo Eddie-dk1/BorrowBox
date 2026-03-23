@@ -1,0 +1,62 @@
+export const mockItems = [
+  {
+    id: 'item_1',
+    title: 'Sony A7 III Camera',
+    category: 'Cameras',
+    pricePerDay: 45,
+    city: 'Moscow',
+    condition: 'good',
+    description: 'Full-frame mirrorless camera with 28-70mm kit lens.',
+    image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+    ownerId: 'user_2',
+    ownerName: 'Nina',
+    deposit: 100,
+    createdAt: '2026-03-18T10:00:00.000Z',
+    isActive: true
+  },
+  {
+    id: 'item_2',
+    title: 'PlayStation 5 Slim',
+    category: 'Gaming',
+    pricePerDay: 30,
+    city: 'Moscow',
+    condition: 'new',
+    description: 'PS5 Slim with two controllers and charging dock.',
+    image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=1200&q=80',
+    ownerId: 'user_3',
+    ownerName: 'Artem',
+    deposit: 80,
+    createdAt: '2026-03-19T10:00:00.000Z',
+    isActive: true
+  },
+  {
+    id: 'item_3',
+    title: 'MacBook Pro 14',
+    category: 'Laptops',
+    pricePerDay: 55,
+    city: 'Saint Petersburg',
+    condition: 'good',
+    description: 'M3 Pro, 18GB RAM, 512GB SSD. Great for editing and coding.',
+    image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80',
+    ownerId: 'user_2',
+    ownerName: 'Nina',
+    deposit: 150,
+    createdAt: '2026-03-20T10:00:00.000Z',
+    isActive: true
+  },
+  {
+    id: 'item_4',
+    title: 'Epson HD Projector',
+    category: 'Projectors',
+    pricePerDay: 25,
+    city: 'Moscow',
+    condition: 'used',
+    description: '1080p projector for movie nights and presentations.',
+    image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=1200&q=80',
+    ownerId: 'user_3',
+    ownerName: 'Artem',
+    deposit: 60,
+    createdAt: '2026-03-21T10:00:00.000Z',
+    isActive: true
+  }
+];
