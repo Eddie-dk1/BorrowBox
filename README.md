@@ -92,3 +92,12 @@ npm run build
 ## Project Status
 MVP is functional on the frontend with local persistence.
 Planned next phase: backend auth, database, and server-side business-rule enforcement.
+
+## Commit Strategy
+Use small, scoped commits so history stays clean and reviewable.
+
+Recommended commit types:
+- `feat(ui): ...` for layout/components/UI-only updates
+- `feat(logic): ...` for store/business rules/data-flow updates
+- `test: ...` for test additions or test-only changes
+- `docs: ...` for README/spec/documentation updates
