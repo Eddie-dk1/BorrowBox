@@ -52,7 +52,6 @@ export default function Header() {
     <header className="border-b border-line bg-white/80 backdrop-blur">
       <div className="border-b border-line/80 bg-orange-50/70">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-2 text-xs text-neutral-700 sm:px-6">
-          <p>Verified community rentals with owner approval on every request</p>
           <p>Signed in as {currentUser.name}</p>
         </div>
       </div>
